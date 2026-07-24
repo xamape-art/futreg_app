@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  height: 100%;
+  background: #20242c;
+}
+
+body {
+  margin: 0;
+  font-family: 'Barlow', sans-serif;
+  overscroll-behavior: none;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.font-condensed {
+  font-family: 'Barlow Semi Condensed', sans-serif;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+@keyframes slideup {
+  0% { transform: translateY(18px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-blink {
+  animation: blink 1.4s infinite;
+}
+
+@keyframes blink-highlight {
+  0%, 100% { background-color: rgba(255, 184, 0, 0.22); }
+  50% { background-color: rgba(255, 184, 0, 0.55); }
+}
+
+.animate-blink-highlight {
+  animation: blink-highlight 1.1s ease-in-out infinite;
+}
+
+.animate-slideup {
+  animation: slideup .22s ease;
+}
+
+.animate-slideup-modal {
+  animation: slideup .24s ease;
+}

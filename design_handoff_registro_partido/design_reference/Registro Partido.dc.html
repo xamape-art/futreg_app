@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  a{color:#E30613}a:hover{color:#b3040f}
+  ::-webkit-scrollbar{width:0;height:0}
+  @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes slideup{0%{transform:translateY(18px);opacity:0}100%{transform:translateY(0);opacity:1}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+</style>
+</helmet>
+<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#20242c;font-family:'Barlow',sans-serif;padding:20px">
+  <div style="position:relative;width:390px;height:844px;background:#10131a;border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 0 0 2px #2b3038;color:#eef1f5">
+
+    <!-- ===== MAIN SCREEN ===== -->
+    <sc-if value="{{ isPartido }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:0;right:0;top:0;bottom:64px;display:flex;flex-direction:column">
+      <!-- header -->
+      <div style="padding:52px 22px 14px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,#151a22,#10131a)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:9px;background:{{ primary }};display:flex;align-items:center;justify-content:center;font-family:'Barlow Semi Condensed';font-weight:800;color:#fff;font-size:18px">A</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;line-height:1.05">{{ teamName }}</div>
+            <div style="font-size:11px;color:#7f8794;font-weight:500">vs {{ matchLabel }}</div>
+          </div>
+        </div>
+        <div onClick="{{ openSummary }}" style="font-size:12px;font-weight:700;color:#aeb6c2;border:1px solid #2b3038;padding:8px 12px;border-radius:20px;cursor:pointer" style-active="background:#1a1f28">Resumen</div>
+      </div>
+
+      <!-- timer -->
+      <div style="margin:6px 18px 0;background:linear-gradient(160deg,#181d26,#12161d);border:1px solid #232935;border-radius:22px;padding:18px 18px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="display:flex;gap:6px">
+            <div onClick="{{ setHalf1 }}" style="{{ half1Style }}">1ª</div>
+            <div onClick="{{ setHalf2 }}" style="{{ half2Style }}">2ª</div>
+          </div>
+          <div style="{{ liveStyle }}">{{ liveText }}</div>
+        </div>
+        <div style="text-align:center;font-family:'Barlow Semi Condensed';font-weight:800;font-size:66px;letter-spacing:1px;line-height:.95;font-variant-numeric:tabular-nums">{{ timeStr }}</div>
+        <div style="text-align:center;color:#7f8794;font-weight:600;font-size:13px;margin-top:2px">minuto {{ minuteStr }}</div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <div onClick="{{ toggleRun }}" style="{{ playBtnStyle }}">{{ playLabel }}</div>
+          <div onClick="{{ resetTimer }}" style="flex:0 0 52px;height:46px;border-radius:14px;border:1px solid #2b3038;display:flex;align-items:center;justify-content:center;color:#aeb6c2;cursor:pointer;font-weight:700;font-size:13px" style-active="background:#1a1f28">RESET</div>
+        </div>
+      </div>
+
+      <!-- scoreboard chips -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 18px 4px">
+        <sc-for list="{{ counters }}" as="c" hint-placeholder-count="4">
+          <div style="{{ c.style }}">
+            <div style="font-family:'Barlow Semi Condensed';font-weight:800;font-size:26px;line-height:1;color:{{ c.color }}">{{ c.count }}</div>
+            <div style="font-size:10px;font-weight:700;color:#8b93a0;letter-spacing:.4px;margin-top:3px;text-transform:uppercase">{{ c.short }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- action buttons -->
+      <div style="padding:10px 18px 6px">
+        <div style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">Registrar acción</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <sc-for list="{{ actionButtons }}" as="b" hint-placeholder-count="4">
+            <div onClick="{{ b.open }}" style="{{ b.style }}" style-active="transform:scale(.96)">
+              <span style="font-family:'Barlow Semi Condensed';font-weight:800;font-size:17px;letter-spacing:.3px">{{ b.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- timeline -->
+      <div style="flex:1;min-height:0;margin:8px 0 0;display:flex;flex-direction:column">
+        <div style="padding:4px 18px 6px;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.6px;text-transform:uppercase">Timeline</div>
+          <div style="font-size:11px;font-weight:600;color:#6b7280">{{ timelineCount }} acciones</div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:0 18px 24px">
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="text-align:center;color:#4c545f;font-weight:500;font-size:13px;padding:34px 12px">Aún no hay acciones.<br>Pulsa un botón para registrar la primera.</div>
+          </sc-if>
+          <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="0">
+            <div style="display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #191e27;animation:slideup .22s ease">
+              <div style="flex:0 0 40px;text-align:center;font-family:'Barlow Semi Condensed';font-weight:800;font-size:17px;color:#cfd5de;padding-top:1px">{{ t.minuteStr }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span style="{{ t.badge }}">{{ t.label }}</span>
+                  <span style="font-weight:700;font-size:14px;color:#eef1f5">{{ t.playerLabel }}</span>
+                </div>
+                <sc-if value="{{ t.hasNote }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12.5px;color:#8b93a0;margin-top:3px;line-height:1.35">{{ t.note }}</div>
+                </sc-if>
+              </div>
+              <div onClick="{{ t.del }}" style="flex:0 0 24px;height:24px;border-radius:7px;color:#5a626d;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px" style-active="background:#1a1f28;color:#E30613">✕</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== PLANTILLA SCREEN ===== -->
+    <sc-if value="{{ isPlantilla }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;top:0;bottom:64px;display:flex;flex-direction:column;background:#10131a">
+      <div style="padding:52px 22px 12px">
+        <div style="font-family:'Barlow Semi Condensed';font-weight:800;font-size:24px">Plantilla</div>
+        <div style="font-size:12px;color:#7f8794;font-weight:500;margin-top:2px">11 titulares · toca la foto para cambiarla</div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:4px 18px 20px">
+        <sc-for list="{{ squad }}" as="p" hint-placeholder-count="11">
+          <div style="display:flex;align-items:center;gap:13px;padding:9px 0;border-bottom:1px solid #191e27">
+            <label style="{{ p.avatarStyle }}">
+              <span style="{{ p.avatarTextStyle }}">{{ p.avatarText }}</span>
+              <span style="position:absolute;right:-2px;bottom:-2px;width:19px;height:19px;border-radius:50%;background:#FFD400;color:#111;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #10131a">+</span>
+              <input type="file" accept="image/*" onChange="{{ p.onPhoto }}" style="display:none">
+            </label>
+            <div style="flex:0 0 52px">
+              <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">Dorsal</div>
+              <input value="{{ p.dorsal }}" onChange="{{ p.onDorsal }}" inputmode="numeric" style="width:52px;height:38px;text-align:center;background:#161b23;border:1px solid #262c37;border-radius:10px;color:#eef1f5;font-family:'Barlow Semi Condensed';font-weight:800;font-size:17px">
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">Nombre</div>
+              <input value="{{ p.name }}" onChange="{{ p.onName }}" style="width:100%;height:38px;background:#161b23;border:1px solid #262c37;border-radius:10px;padding:0 12px;color:#eef1f5;font-family:'Barlow',sans-serif;font-weight:600;font-size:15px">
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== ASSIGN MODAL ===== -->
+    <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#0c0f14;display:flex;flex-direction:column;animation:slideup .24s ease;z-index:20">
+        <div style="padding:50px 18px 12px;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:9px">
+            <span style="{{ modalBadge }}">{{ modalLabel }}</span>
+            <span style="font-family:'Barlow Semi Condensed';font-weight:800;font-size:18px">{{ minuteStr }}</span>
+          </div>
+          <div onClick="{{ onCancel }}" style="width:34px;height:34px;border-radius:10px;border:1px solid #2b3038;display:flex;align-items:center;justify-content:center;color:#aeb6c2;cursor:pointer;font-size:17px" style-active="background:#1a1f28">✕</div>
+        </div>
+        <div style="padding:0 18px 4px;color:#7f8794;font-size:12px;font-weight:500">Toca al jugador · marca el punto · arrastra para la trayectoria</div>
+
+        <!-- pitch -->
+        <div style="flex:1;min-height:0;padding:10px 16px 6px;display:flex;align-items:stretch">
+          <div style="position:relative;flex:1;border-radius:14px;overflow:hidden;background:linear-gradient(#1f9c4d,#178040);box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 8px 24px rgba(0,0,0,.35)">
+            <!-- stripes -->
+            <div style="position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.06) 0 9%,transparent 9% 18%)"></div>
+            <!-- markings -->
+            <div style="position:absolute;left:50%;top:50%;width:118px;height:118px;border:2px solid rgba(255,255,255,.45);border-radius:50%;transform:translate(-50%,-50%)"></div>
+            <div style="position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.45)"></div>
+            <div style="position:absolute;left:50%;top:50%;width:8px;height:8px;background:rgba(255,255,255,.6);border-radius:50%;transform:translate(-50%,-50%)"></div>
+            <div style="position:absolute;left:22%;right:22%;top:0;height:15%;border:2px solid rgba(255,255,255,.45);border-top:none"></div>
+            <div style="position:absolute;left:35%;right:35%;top:0;height:6%;border:2px solid rgba(255,255,255,.45);border-top:none"></div>
+            <div style="position:absolute;left:22%;right:22%;bottom:0;height:15%;border:2px solid rgba(255,255,255,.45);border-bottom:none"></div>
+            <div style="position:absolute;left:35%;right:35%;bottom:0;height:6%;border:2px solid rgba(255,255,255,.45);border-bottom:none"></div>
+            <!-- interaction layer -->
+            <div onPointerDown="{{ pitchDown }}" onPointerMove="{{ pitchMove }}" onPointerUp="{{ pitchUp }}" style="position:absolute;inset:0;z-index:1;cursor:crosshair;touch-action:none"></div>
+            <!-- overlay (point + arrow) -->
+            <div style="position:absolute;inset:0;z-index:2;pointer-events:none">{{ overlaySvg }}</div>
+            <!-- players -->
+            <sc-for list="{{ players }}" as="p" hint-placeholder-count="11">
+              <div onPointerDown="{{ p.down }}" style="{{ p.markerStyle }}">
+                <div style="{{ p.dotStyle }}">{{ p.dotContent }}</div>
+                <div style="{{ p.nameStyle }}">{{ p.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- footer -->
+        <div style="padding:8px 18px 26px;background:#0c0f14">
+          <div style="{{ selReadoutStyle }}">{{ selReadout }}</div>
+          <textarea value="{{ note }}" onChange="{{ onNote }}" placeholder="Notas (opcional): descripción, contexto…" style="width:100%;height:52px;resize:none;background:#161b23;border:1px solid #262c37;border-radius:12px;padding:10px 12px;color:#eef1f5;font-family:'Barlow',sans-serif;font-size:13.5px;margin:10px 0" style-focus="border-color:#3a424f"></textarea>
+          <div style="display:flex;gap:10px">
+            <div onClick="{{ onCancel }}" style="flex:0 0 108px;height:50px;border-radius:14px;border:1px solid #2b3038;display:flex;align-items:center;justify-content:center;color:#aeb6c2;font-weight:700;cursor:pointer" style-active="background:#1a1f28">Cancelar</div>
+            <div onClick="{{ onSave }}" style="{{ saveBtnStyle }}">Guardar acción</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== SUMMARY ===== -->
+    <sc-if value="{{ showSummary }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#0c0f14;display:flex;flex-direction:column;animation:slideup .24s ease;z-index:30">
+        <div style="padding:50px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #191e27">
+          <div>
+            <div style="font-weight:800;font-size:19px;font-family:'Barlow Semi Condensed'">Resumen del partido</div>
+            <div style="font-size:12px;color:#7f8794;font-weight:500">{{ teamName }} · vs {{ matchLabel }} · {{ minuteStr }}</div>
+          </div>
+          <div onClick="{{ closeSummary }}" style="width:34px;height:34px;border-radius:10px;border:1px solid #2b3038;display:flex;align-items:center;justify-content:center;color:#aeb6c2;cursor:pointer;font-size:17px" style-active="background:#1a1f28">✕</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 18px">
+          <sc-for list="{{ counters }}" as="c" hint-placeholder-count="4">
+            <div style="{{ c.style }}">
+              <div style="font-family:'Barlow Semi Condensed';font-weight:800;font-size:24px;color:{{ c.color }}">{{ c.count }}</div>
+              <div style="font-size:10px;font-weight:700;color:#8b93a0;text-transform:uppercase;margin-top:2px">{{ c.short }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:7px;overflow-x:auto;padding:2px 18px 10px">
+          <sc-for list="{{ eventFilters }}" as="f" hint-placeholder-count="5">
+            <div onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</div>
+          </sc-for>
+        </div>
+        <div style="padding:0 18px 8px">
+          <select value="{{ sumPlayer }}" onChange="{{ onPlayerFilter }}" style="width:100%;height:40px;background:#161b23;border:1px solid #262c37;border-radius:11px;padding:0 12px;color:#eef1f5;font-family:'Barlow',sans-serif;font-weight:600;font-size:14px">
+            <sc-for list="{{ playerOptions }}" as="o" hint-placeholder-count="12">
+              <option value="{{ o.value }}">{{ o.label }}</option>
+            </sc-for>
+          </select>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:2px 18px 12px">
+          <sc-if value="{{ sumEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center;color:#4c545f;font-weight:500;font-size:13px;padding:28px 12px">Sin acciones para este filtro.</div>
+          </sc-if>
+          <sc-for list="{{ summaryTimeline }}" as="t" hint-placeholder-count="0">
+            <div style="display:flex;gap:11px;padding:10px 0;border-bottom:1px solid #191e27">
+              <div style="flex:0 0 40px;text-align:center;font-family:'Barlow Semi Condensed';font-weight:800;font-size:16px;color:#cfd5de">{{ t.minuteStr }}</div>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:7px"><span style="{{ t.badge }}">{{ t.label }}</span><span style="font-weight:700;font-size:14px">{{ t.playerLabel }}</span></div>
+                <sc-if value="{{ t.hasNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:#8b93a0;margin-top:3px">{{ t.note }}</div></sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:8px 18px 26px;background:#0c0f14;border-top:1px solid #191e27">
+          <div onClick="{{ copySummary }}" style="{{ copyBtnStyle }}">{{ copyLabel }}</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== TAB BAR ===== -->
+    <div style="position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;background:#0c0f14;border-top:1px solid #1c222c;z-index:10">
+      <div onClick="{{ goPartido }}" style="{{ tabPartidoStyle }}">Partido</div>
+      <div onClick="{{ goPlantilla }}" style="{{ tabPlantillaStyle }}">Plantilla</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:884},&quot;teamName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Athletic Club&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;matchLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Rival&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;primaryColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#E30613&quot;,&quot;options&quot;:[&quot;#E30613&quot;,&quot;#005BAC&quot;,&quot;#0A7E3D&quot;,&quot;#111827&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.state = {
+      running:false, seconds:0, half:1, phase:'pre',
+      actions:[],
+      modalOpen:false, pendingType:null,
+      selPlayer:null, point:null, drag:null, note:'',
+      showSummary:false, copied:false, tab:'partido',
+      sumType:'all', sumPlayer:'all',
+    };
+    this.META = {
+      gol:   {label:'GOL',           short:'Goles',     color:'#E30613'},
+      ocasion:{label:'OCASIÓN',      short:'Ocasiones', color:'#F5A623'},
+      tiro:  {label:'TIRO A PUERTA', short:'Tiros',     color:'#2D9CDB'},
+      falta: {label:'FALTA',         short:'Faltas',    color:'#8A94A6'},
+    };
+    this.state.roster = [
+      {id:1, n:1, name:'Asier',  x:50, y:90, photo:null},
+      {id:2, n:2, name:'Unai',   x:15, y:73, photo:null},
+      {id:3, n:3, name:'Pedro',  x:38, y:76, photo:null},
+      {id:4, n:4, name:'Germán', x:62, y:76, photo:null},
+      {id:5, n:5, name:'Manuel', x:85, y:73, photo:null},
+      {id:6, n:6, name:'López',  x:34, y:56, photo:null},
+      {id:7, n:8, name:'Manolo', x:66, y:56, photo:null},
+      {id:8, n:7, name:'Salinas',x:18, y:36, photo:null},
+      {id:9, n:10,name:'Pedrosa',x:50, y:33, photo:null},
+      {id:10,n:11,name:'Jaime',  x:82, y:36, photo:null},
+      {id:11,n:9, name:'Julian', x:50, y:14, photo:null},
+    ];
+  }
+  componentDidMount(){ this.iv = setInterval(()=>{ if(this.state.running) this.setState(s=>({seconds:s.seconds+1})); },1000); }
+  componentWillUnmount(){ clearInterval(this.iv); }
+
+  fmt(s){ const m=Math.floor(s/60), ss=s%60; return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'); }
+
+  openModal(type){ this.setState({modalOpen:true, pendingType:type, selPlayer:null, point:null, drag:null, note:''}); }
+  onCancel(){ this.setState({modalOpen:false, pendingType:null}); }
+
+  pxy(e){
+    const r = e.currentTarget.getBoundingClientRect();
+    let x=((e.clientX-r.left)/r.width)*100, y=((e.clientY-r.top)/r.height)*100;
+    return {x:Math.max(0,Math.min(100,x)), y:Math.max(0,Math.min(100,y))};
+  }
+  pitchDown(e){ const p=this.pxy(e); this._dragging=true; try{e.currentTarget.setPointerCapture(e.pointerId)}catch(_){}; this.setState({point:p, drag:{x0:p.x,y0:p.y,x1:p.x,y1:p.y}}); }
+  pitchMove(e){ if(!this._dragging)return; const p=this.pxy(e); this.setState(s=>({drag:{...s.drag,x1:p.x,y1:p.y}})); }
+  pitchUp(e){ this._dragging=false; }
+
+  onSave(){
+    const m=this.META[this.state.pendingType];
+    const act={
+      id:Date.now(), type:this.state.pendingType, seconds:this.state.seconds,
+      player:this.state.selPlayer, point:this.state.point,
+      drag:this.state.drag, note:this.state.note.trim(),
+    };
+    this.setState(s=>({actions:s.actions.concat(act), modalOpen:false, pendingType:null}));
+  }
+
+  advance(){
+    const p=this.state.phase;
+    if(p==='pre') this.setState({phase:'1H',running:true,half:1});
+    else if(p==='1H') this.setState({phase:'ht',running:false});
+    else if(p==='ht') this.setState({phase:'2H',running:true,half:2});
+    else if(p==='2H') this.setState({phase:'ft',running:false});
+    else if(p==='ft') this.setState({phase:'end',running:false,showSummary:true});
+    else if(p==='end') this.setState({phase:'pre',running:false,seconds:0,half:1,actions:[]});
+  }
+  setRoster(id,field,value){ this.setState(s=>({roster:s.roster.map(p=>p.id===id?{...p,[field]:value}:p)})); }
+  onPhoto(id,e){ const f=e.target.files&&e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>this.setRoster(id,'photo',r.result); r.readAsDataURL(f); }
+
+  renderVals(){
+    const S=this.state, M=this.META;
+    const primary = this.props.primaryColor || '#E30613';
+    const teamName = this.props.teamName || 'Athletic Club';
+    const matchLabel = this.props.matchLabel || 'Rival';
+    const minuteStr = Math.floor(S.seconds/60)+"'";
+
+    const count = k => S.actions.filter(a=>a.type===k).length;
+    const chip = (color) => ({background:'#141922',border:'1px solid #202632',borderRadius:'14px',padding:'11px 4px',textAlign:'center'});
+    const counters = Object.keys(M).map(k=>({key:k, short:M[k].short, color:M[k].color, count:count(k), style:chip()}));
+
+    const actionButtons = Object.keys(M).map(k=>{
+      const c=M[k].color;
+      return {key:k, label:M[k].label,
+        style:{height:'58px',borderRadius:'16px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'#fff',background:c,boxShadow:'0 6px 16px '+c+'55',transition:'transform .08s'},
+        open:()=>this.openModal(k)};
+    });
+
+    const badge = (c)=>({background:c,color:'#fff',fontFamily:"'Barlow Semi Condensed'",fontWeight:'800',fontSize:'11px',letterSpacing:'.4px',padding:'3px 8px',borderRadius:'6px',whiteSpace:'nowrap'});
+    const timeline = S.actions.slice().reverse().map(a=>({
+      id:a.id, minuteStr:Math.floor(a.seconds/60)+"'",
+      label:M[a.type].label, badge:badge(M[a.type].color),
+      playerLabel: a.player ? (a.player.name+' · '+a.player.n) : 'Sin jugador',
+      note:a.note, hasNote:!!a.note,
+      del:()=>this.setState(s=>({actions:s.actions.filter(x=>x.id!==a.id)})),
+    }));
+
+    // pitch players
+    const players = S.roster.map(p=>{
+      const sel = S.selPlayer && S.selPlayer.id===p.id;
+      return {
+        dotContent: p.photo ? '' : p.n, label: p.n+' '+p.name,
+        markerStyle:{position:'absolute',left:p.x+'%',top:p.y+'%',transform:'translate(-50%,-50%)',zIndex:3,display:'flex',flexDirection:'column',alignItems:'center',cursor:'pointer',touchAction:'none'},
+        dotStyle:{width:'32px',height:'32px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Barlow Semi Condensed'",fontWeight:'800',fontSize:'15px',color:sel?'#111':'#fff',background:p.photo?'#000':(sel?'#FFD400':primary),backgroundImage:p.photo?('url('+p.photo+')'):'none',backgroundSize:'cover',backgroundPosition:'center',border:'2px solid '+(sel?'#FFD400':'rgba(255,255,255,.85)'),boxShadow:sel?'0 0 0 4px rgba(255,212,0,.45)':'0 2px 6px rgba(0,0,0,.4)'},
+        nameStyle:{marginTop:'3px',fontSize:'9.5px',fontWeight:'700',color:'#fff',textShadow:'0 1px 2px rgba(0,0,0,.7)',whiteSpace:'nowrap'},
+        down:(e)=>{ e.stopPropagation(); this.setState({selPlayer:{id:p.id,n:p.n,name:p.name}}); },
+      };
+    });
+
+    const squad = S.roster.map(p=>({
+      hasPhoto:!!p.photo, dorsal:String(p.n), name:p.name,
+      avatarStyle:{position:'relative',width:'52px',height:'52px',flex:'0 0 52px',borderRadius:'50%',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',background:p.photo?'#000':primary,backgroundImage:p.photo?('url('+p.photo+')'):'none',backgroundSize:'cover',backgroundPosition:'center',border:'2px solid rgba(255,255,255,.25)'},
+      avatarTextStyle:{display:p.photo?'none':'block',fontFamily:"'Barlow Semi Condensed'",fontWeight:'800',fontSize:'19px',color:'#fff'},
+      avatarText: p.photo ? '' : String(p.n),
+      onPhoto:(e)=>this.onPhoto(p.id,e),
+      onName:(e)=>this.setRoster(p.id,'name',e.target.value),
+      onDorsal:(e)=>this.setRoster(p.id,'n',e.target.value),
+    }));
+
+    // summary filters
+    const chip2=(active,c)=>({padding:'6px 11px',borderRadius:'20px',fontSize:'11.5px',fontWeight:'700',cursor:'pointer',whiteSpace:'nowrap',color:active?'#fff':'#aeb6c2',background:active?(c||primary):'transparent',border:'1px solid '+(active?(c||primary):'#2b3038')});
+    const eventFilters=[{key:'all',label:'Todos',color:'#5a6470'}].concat(Object.keys(M).map(k=>({key:k,label:M[k].label,color:M[k].color}))).map(f=>({label:f.label,style:chip2(S.sumType===f.key,f.color),pick:()=>this.setState({sumType:f.key})}));
+    const playerOptions=[{value:'all',label:'Todos los jugadores'}].concat(S.roster.map(p=>({value:String(p.id),label:p.n+' · '+p.name})));
+    const toItem = a => ({ id:a.id, minuteStr:Math.floor(a.seconds/60)+"'", label:M[a.type].label, badge:badge(M[a.type].color), playerLabel:a.player?(a.player.name+' · '+a.player.n):'Sin jugador', note:a.note, hasNote:!!a.note });
+    const summaryTimeline = S.actions.filter(a=>(S.sumType==='all'||a.type===S.sumType)&&(S.sumPlayer==='all'||(a.player&&String(a.player.id)===String(S.sumPlayer)))).slice().reverse().map(toItem);
+
+    const pcfg=({pre:{label:'INICIAR 1ª PARTE',bg:primary,fg:'#fff'},'1H':{label:'DETENER',bg:'#FFD400',fg:'#111'},ht:{label:'COMENZAR 2ª PARTE',bg:primary,fg:'#fff'},'2H':{label:'DETENER',bg:'#FFD400',fg:'#111'},ft:{label:'FINALIZAR PARTIDO',bg:'#E30613',fg:'#fff'},end:{label:'NUEVO PARTIDO',bg:'#39404b',fg:'#eef1f5'}})[S.phase];
+    const live=({pre:['',' '],'1H':['● EN JUEGO','#4ade80'],ht:['● DESCANSO','#F5A623'],'2H':['● EN JUEGO','#4ade80'],ft:['● FINALIZADO','#8A94A6'],end:['● FINALIZADO','#8A94A6']})[S.phase];
+
+    const tabStyle=(active)=>({flex:'1',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',fontWeight:'700',fontSize:'13px',color:active?'#eef1f5':'#6b7280',borderTop:'2px solid '+(active?primary:'transparent')});
+
+    // overlay svg
+    let overlaySvg=null;
+    const d=S.drag, pt=S.point;
+    if(pt){
+      const dist = d ? Math.hypot(d.x1-d.x0,d.y1-d.y0) : 0;
+      const kids=[];
+      if(d && dist>4){
+        kids.push(React.createElement('defs',{key:'df'},
+          React.createElement('marker',{id:'ah',markerWidth:'6',markerHeight:'6',refX:'4',refY:'3',orient:'auto'},
+            React.createElement('path',{d:'M0,0 L6,3 L0,6 Z',fill:'#FFD400'}))));
+        kids.push(React.createElement('line',{key:'ln',x1:d.x0,y1:d.y0,x2:d.x1,y2:d.y1,stroke:'#FFD400',strokeWidth:'0.9',strokeLinecap:'round',markerEnd:'url(#ah)',vectorEffect:'non-scaling-stroke'}));
+        kids.push(React.createElement('circle',{key:'c0',cx:d.x0,cy:d.y0,r:'1.3',fill:'#FFD400'}));
+      } else {
+        kids.push(React.createElement('circle',{key:'pt',cx:pt.x,cy:pt.y,r:'1.8',fill:'#FFD400',stroke:'#111',strokeWidth:'0.5'}));
+      }
+      overlaySvg=React.createElement('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'none',style:{width:'100%',height:'100%'}},kids);
+    }
+
+    const canSave = !!S.selPlayer;
+    const selReadout = S.selPlayer ? ('Jugador: '+S.selPlayer.name+' · '+S.selPlayer.n) : 'Selecciona un jugador para guardar';
+    const mm = S.pendingType?M[S.pendingType]:{label:'',color:'#333'};
+
+    // summary text
+    const lines = S.actions.map(a=>Math.floor(a.seconds/60)+"' "+M[a.type].label+(a.player?(' - '+a.player.name+' ('+a.player.n+')'):'')+(a.note?(' | '+a.note):''));
+    const summaryText = teamName+' vs '+matchLabel+' ('+minuteStr+")\n"+
+      'Goles: '+count('gol')+' | Ocasiones: '+count('ocasion')+' | Tiros: '+count('tiro')+' | Faltas: '+count('falta')+"\n\n"+
+      (lines.length?lines.join("\n"):'Sin acciones registradas.');
+
+    const halfBtn=(active)=>({padding:'5px 12px',borderRadius:'9px',fontWeight:'700',fontSize:'12px',cursor:'pointer',color:active?'#111':'#aeb6c2',background:active?'#FFD400':'transparent',border:'1px solid '+(active?'#FFD400':'#2b3038')});
+
+    return {
+      teamName, matchLabel, primary, minuteStr, timeStr:this.fmt(S.seconds),
+      running:S.running,
+      half1Style:halfBtn(S.half===1), half2Style:halfBtn(S.half===2),
+      setHalf1:()=>{}, setHalf2:()=>{},
+      liveText:live[0], liveStyle:{fontSize:'10px',fontWeight:'800',letterSpacing:'.5px',color:live[1],animation:S.running?'blink 1.4s infinite':'none'},
+      toggleRun:this.advance.bind(this),
+      resetTimer:()=>this.setState({running:false,seconds:0,phase:'pre',half:1}),
+      playLabel:pcfg.label,
+      playBtnStyle:{flex:'1',height:'46px',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'800',fontSize:'15px',letterSpacing:'.4px',cursor:'pointer',color:pcfg.fg,background:pcfg.bg},
+      counters, actionButtons, squad,
+      eventFilters, playerOptions, summaryTimeline, sumPlayer:String(S.sumPlayer),
+      onPlayerFilter:(e)=>this.setState({sumPlayer:e.target.value}),
+      sumEmpty:summaryTimeline.length===0,
+      isPartido:S.tab==='partido', isPlantilla:S.tab==='plantilla',
+      goPartido:()=>this.setState({tab:'partido'}), goPlantilla:()=>this.setState({tab:'plantilla'}),
+      tabPartidoStyle:tabStyle(S.tab==='partido'), tabPlantillaStyle:tabStyle(S.tab==='plantilla'),
+      timeline, isEmpty:S.actions.length===0, timelineCount:S.actions.length,
+      // modal
+      modalOpen:S.modalOpen, modalLabel:mm.label, modalBadge:badge(mm.color),
+      players, overlaySvg,
+      note:S.note, onNote:(e)=>this.setState({note:e.target.value}),
+      pitchDown:this.pitchDown.bind(this), pitchMove:this.pitchMove.bind(this), pitchUp:this.pitchUp.bind(this),
+      selReadout,
+      selReadoutStyle:{fontSize:'12.5px',fontWeight:'600',color:canSave?'#4ade80':'#7f8794',textAlign:'center'},
+      onCancel:this.onCancel.bind(this), onSave:canSave?this.onSave.bind(this):()=>{},
+      saveBtnStyle:{flex:'1',height:'50px',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'800',fontSize:'15px',cursor:canSave?'pointer':'not-allowed',color:'#fff',background:canSave?primary:'#39404b',opacity:canSave?1:.7},
+      // summary
+      showSummary:S.showSummary,
+      openSummary:()=>this.setState({showSummary:true,copied:false}),
+      closeSummary:()=>this.setState({showSummary:false}),
+      copyLabel:S.copied?'¡Copiado!':'Copiar resumen',
+      copyBtnStyle:{height:'52px',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'800',fontSize:'15px',cursor:'pointer',color:S.copied?'#111':'#fff',background:S.copied?'#4ade80':primary},
+      copySummary:()=>{ try{navigator.clipboard.writeText(summaryText);}catch(_){}; this.setState({copied:true}); setTimeout(()=>this.setState({copied:false}),1800); },
+    };
+  }
+}
+</script>
+</body>
+</html>
