@@ -25,11 +25,31 @@ function matchPatch(state: MatchState): repo.MatchPatch {
   };
 }
 
+/**
+ * Supabase devuelve los fallos del magic link en la propia URL de vuelta
+ * (en el hash con flujo implicito, en la query con PKCE). Sin leerlos, la app
+ * repinta el login sin decir nada y parece que el enlace no hizo nada.
+ */
+function readAuthErrorFromUrl(): string | null {
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const query = new URLSearchParams(window.location.search);
+  const description = hash.get('error_description') ?? query.get('error_description');
+  const code = hash.get('error_code') ?? query.get('error_code') ?? hash.get('error') ?? query.get('error');
+  if (!description && !code) return null;
+
+  // Solo se limpia cuando hay error: si hubiera tokens, borrarlos aqui
+  // impediria que detectSessionInUrl los leyera.
+  window.history.replaceState({}, '', window.location.pathname);
+  return description ? `${description}${code ? ` (${code})` : ''}` : code;
+}
+
 export interface Cloud {
   enabled: boolean;
   session: Session | null;
   status: SyncStatus;
   error: string | null;
+  /** Error devuelto por el enlace del email, si lo hubo. */
+  authError: string | null;
   history: MatchSummary[];
   signIn: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -44,6 +64,10 @@ export function useCloud(state: MatchState, dispatch: React.Dispatch<Action>): C
   const [status, setStatus] = useState<SyncStatus>(cloudEnabled ? 'signed-out' : 'off');
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<MatchSummary[]>([]);
+  // Se lee una sola vez, en el primer render, antes de que nadie toque la URL.
+  const [authError, setAuthError] = useState<string | null>(() =>
+    cloudEnabled ? readAuthErrorFromUrl() : null,
+  );
 
   // El push lee siempre el estado mas reciente, no el que capturo el efecto.
   const stateRef = useRef(state);
@@ -224,6 +248,7 @@ export function useCloud(state: MatchState, dispatch: React.Dispatch<Action>): C
 
   const signIn = useCallback(async (email: string) => {
     if (!supabase) return;
+    setAuthError(null);
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: window.location.href },
@@ -320,6 +345,7 @@ export function useCloud(state: MatchState, dispatch: React.Dispatch<Action>): C
     session,
     status,
     error,
+    authError,
     history,
     signIn,
     signOut,

@@ -2,11 +2,13 @@ import { useState } from 'react';
 
 interface LoginScreenProps {
   primary: string;
+  /** Error que trajo de vuelta el enlace del email, si lo hubo. */
+  authError: string | null;
   onSignIn: (email: string) => Promise<void>;
   onSkip: () => void;
 }
 
-export function LoginScreen({ primary, onSignIn, onSkip }: LoginScreenProps) {
+export function LoginScreen({ primary, authError, onSignIn, onSkip }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -41,6 +43,16 @@ export function LoginScreen({ primary, onSignIn, onSkip }: LoginScreenProps) {
       <div className="mt-1.5 text-[13px] font-medium leading-relaxed text-[#7f8794]">
         Entra con tu email para guardar los partidos en la nube y verlos desde cualquier dispositivo.
       </div>
+
+      {authError && !sent && (
+        <div className="mt-5 rounded-[14px] border border-[#4a2b2b] bg-[#1d1416] p-3.5">
+          <div className="text-[13px] font-bold text-[#ff6b6b]">El enlace no funciono</div>
+          <div className="mt-1 text-[12px] font-medium leading-relaxed text-[#a98d8d]">{authError}</div>
+          <div className="mt-1.5 text-[11px] font-medium leading-relaxed text-[#7f8794]">
+            Los enlaces son de un solo uso y caducan. Pide uno nuevo y abrelo en este mismo navegador.
+          </div>
+        </div>
+      )}
 
       {sent ? (
         <div className="mt-7 rounded-[14px] border border-[#2b3038] bg-[#141922] p-4">

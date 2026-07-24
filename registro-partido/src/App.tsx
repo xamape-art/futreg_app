@@ -27,7 +27,12 @@ function App() {
         style={{ boxShadow: '0 30px 80px rgba(0,0,0,.5), inset 0 0 0 2px #2b3038' }}
       >
         {needsLogin ? (
-          <LoginScreen primary={state.primary} onSignIn={cloud.signIn} onSkip={() => setSkippedLogin(true)} />
+          <LoginScreen
+            primary={state.primary}
+            authError={cloud.authError}
+            onSignIn={cloud.signIn}
+            onSkip={() => setSkippedLogin(true)}
+          />
         ) : (
           <>
             {state.tab === 'partido' && <PartidoScreen state={state} dispatch={dispatch} />}
