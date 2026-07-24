@@ -6,7 +6,7 @@ export type ShotType = 'tiro' | '1v1' | 'pie' | 'cabeza';
 
 export type Phase = 'pre' | '1H' | 'ht' | '2H' | 'ft' | 'end';
 
-export type Tab = 'partido' | 'plantilla';
+export type Tab = 'partido' | 'plantilla' | 'historial';
 
 export interface Player {
   id: number;
@@ -14,7 +14,10 @@ export interface Player {
   name: string;
   x: number;
   y: number;
+  /** URL mostrable: data: en modo local, https firmada cuando viene de Storage. */
   photo: string | null;
+  /** Ruta dentro del bucket player-photos. null mientras la foto solo sea local. */
+  photoPath?: string | null;
 }
 
 export interface PlayerRef {
@@ -50,7 +53,23 @@ export interface MatchAction {
   note: string;
 }
 
+/** Estado del sincronizado con Supabase, para el indicador de la cabecera. */
+export type SyncStatus = 'off' | 'signed-out' | 'hydrating' | 'idle' | 'saving' | 'error';
+
+/** Fila del historial: un partido pasado con sus totales por tipo de accion. */
+export interface MatchSummary {
+  id: string;
+  date: string;
+  local: string;
+  visitante: string;
+  seconds: number;
+  finished: boolean;
+  counts: Record<ActionType, number>;
+}
+
 export interface MatchState {
+  /** uuid del partido en Supabase. null en modo local o antes de crearlo. */
+  matchId: string | null;
   phase: Phase;
   running: boolean;
   seconds: number;

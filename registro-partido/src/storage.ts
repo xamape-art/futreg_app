@@ -5,6 +5,7 @@ const KEYS = {
   actions: 'rp.actions',
   match: 'rp.match',
   matchInfo: 'rp.matchInfo',
+  matchId: 'rp.matchId',
 } as const;
 
 export interface PersistedMatch {
@@ -58,4 +59,14 @@ export function loadMatchInfo(): PersistedMatchInfo | null {
 
 export function saveMatchInfo(info: PersistedMatchInfo) {
   localStorage.setItem(KEYS.matchInfo, JSON.stringify(info));
+}
+
+/** uuid del partido en Supabase, para reengancharlo tras recargar la pagina. */
+export function loadMatchId(): string | null {
+  return localStorage.getItem(KEYS.matchId);
+}
+
+export function saveMatchId(matchId: string | null) {
+  if (matchId) localStorage.setItem(KEYS.matchId, matchId);
+  else localStorage.removeItem(KEYS.matchId);
 }

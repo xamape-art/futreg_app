@@ -4,18 +4,14 @@ import type { MatchState } from '../../types';
 interface PlantillaScreenProps {
   state: MatchState;
   dispatch: React.Dispatch<Action>;
+  /** Sube a Storage si hay sesion; si no, guarda la foto como data URL. */
+  onPhoto: (id: number, file: File) => Promise<void>;
 }
 
-export function PlantillaScreen({ state, dispatch }: PlantillaScreenProps) {
-  const onPhoto = (id: number, file: File | undefined) => {
+export function PlantillaScreen({ state, dispatch, onPhoto }: PlantillaScreenProps) {
+  const handlePhoto = (id: number, file: File | undefined) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        dispatch({ type: 'SET_PHOTO', id, photo: reader.result });
-      }
-    };
-    reader.readAsDataURL(file);
+    void onPhoto(id, file);
   };
 
   return (
@@ -51,7 +47,7 @@ export function PlantillaScreen({ state, dispatch }: PlantillaScreenProps) {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => onPhoto(p.id, e.target.files?.[0])}
+                onChange={(e) => handlePhoto(p.id, e.target.files?.[0])}
               />
             </label>
             <div className="w-[52px] flex-none">

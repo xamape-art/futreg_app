@@ -6,28 +6,27 @@ interface TabBarProps {
   onChange: (tab: Tab) => void;
 }
 
-export function TabBar({ tab, primary, onChange }: TabBarProps) {
-  const tabClass = (active: boolean) =>
-    `flex flex-1 cursor-pointer items-center justify-center text-[13px] font-bold border-t-2 ${
-      active ? 'text-[#eef1f5]' : 'text-[#6b7280]'
-    }`;
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'plantilla', label: 'Plantilla' },
+  { key: 'partido', label: 'Partido' },
+  { key: 'historial', label: 'Historial' },
+];
 
+export function TabBar({ tab, primary, onChange }: TabBarProps) {
   return (
     <div className="absolute inset-x-0 bottom-0 z-10 flex h-16 border-t border-[#1c222c] bg-[#0c0f14]">
-      <div
-        onClick={() => onChange('plantilla')}
-        className={tabClass(tab === 'plantilla')}
-        style={{ borderTopColor: tab === 'plantilla' ? primary : 'transparent' }}
-      >
-        Plantilla
-      </div>
-      <div
-        onClick={() => onChange('partido')}
-        className={tabClass(tab === 'partido')}
-        style={{ borderTopColor: tab === 'partido' ? primary : 'transparent' }}
-      >
-        Partido
-      </div>
+      {TABS.map(({ key, label }) => (
+        <div
+          key={key}
+          onClick={() => onChange(key)}
+          className={`flex flex-1 cursor-pointer items-center justify-center border-t-2 text-[13px] font-bold ${
+            tab === key ? 'text-[#eef1f5]' : 'text-[#6b7280]'
+          }`}
+          style={{ borderTopColor: tab === key ? primary : 'transparent' }}
+        >
+          {label}
+        </div>
+      ))}
     </div>
   );
 }

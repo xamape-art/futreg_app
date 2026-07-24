@@ -5,12 +5,15 @@ import {
   DEFAULT_VISITANTE,
   HAS_GOAL_STEP,
 } from './constants';
-import { loadActions, loadMatch, loadMatchInfo, loadRoster } from './storage';
+import { loadActions, loadMatch, loadMatchId, loadMatchInfo, loadRoster } from './storage';
 import type {
   ActionType,
   Drag,
   DuelResult,
+  MatchAction,
   MatchState,
+  Phase,
+  Player,
   PlayerRef,
   Point,
   ShotType,
@@ -25,6 +28,7 @@ export function createInitialState(): MatchState {
   const persistedMatch = loadMatch();
   const persistedMatchInfo = loadMatchInfo();
   return {
+    matchId: loadMatchId(),
     phase: (persistedMatch?.phase as MatchState['phase']) ?? 'pre',
     running: false,
     seconds: persistedMatch?.seconds ?? 0,
@@ -82,7 +86,10 @@ export type Action =
   | { type: 'DELETE_ACTION'; id: number }
   | { type: 'SET_TAB'; tab: Tab }
   | { type: 'SET_ROSTER_FIELD'; id: number; field: 'name' | 'n'; value: string }
-  | { type: 'SET_PHOTO'; id: number; photo: string }
+  | { type: 'SET_PHOTO'; id: number; photo: string; path?: string | null }
+  | { type: 'HYDRATE_ROSTER'; roster: Player[] }
+  | { type: 'HYDRATE_MATCH'; matchId: string; date: string; local: string; visitante: string; phase: Phase; seconds: number; half: 1 | 2; actions: MatchAction[] }
+  | { type: 'SET_MATCH_ID'; matchId: string | null }
   | { type: 'OPEN_SUMMARY' }
   | { type: 'CLOSE_SUMMARY' }
   | { type: 'SET_SUM_TYPE'; sumType: ActionType | 'all' }
@@ -114,7 +121,9 @@ export function reducer(state: MatchState, action: Action): MatchState {
         case 'ft':
           return { ...state, phase: 'end', running: false, showSummary: true, copied: false };
         case 'end':
-          return { ...state, phase: 'pre', running: false, seconds: 0, half: 1, actions: [] };
+          // Empieza un partido nuevo: soltamos el id para que la nube cree otra fila
+          // en vez de sobreescribir el que se acaba de cerrar.
+          return { ...state, matchId: null, phase: 'pre', running: false, seconds: 0, half: 1, actions: [] };
         default:
           return state;
       }
@@ -248,8 +257,30 @@ export function reducer(state: MatchState, action: Action): MatchState {
     case 'SET_PHOTO':
       return {
         ...state,
-        roster: state.roster.map((p) => (p.id === action.id ? { ...p, photo: action.photo } : p)),
+        roster: state.roster.map((p) =>
+          p.id === action.id ? { ...p, photo: action.photo, photoPath: action.path ?? p.photoPath ?? null } : p,
+        ),
       };
+
+    case 'HYDRATE_ROSTER':
+      return { ...state, roster: action.roster };
+
+    case 'HYDRATE_MATCH':
+      return {
+        ...state,
+        matchId: action.matchId,
+        matchDate: action.date,
+        local: action.local,
+        visitante: action.visitante,
+        phase: action.phase,
+        seconds: action.seconds,
+        half: action.half,
+        actions: action.actions,
+        running: false,
+      };
+
+    case 'SET_MATCH_ID':
+      return { ...state, matchId: action.matchId };
 
     case 'OPEN_SUMMARY':
       return { ...state, showSummary: true, copied: false };

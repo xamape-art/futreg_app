@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react';
 import { createInitialState, reducer } from '../state';
-import { saveActions, saveMatch, saveMatchInfo, saveRoster } from '../storage';
+import { saveActions, saveMatch, saveMatchId, saveMatchInfo, saveRoster } from '../storage';
 
 export function useMatchStore() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
@@ -25,6 +25,10 @@ export function useMatchStore() {
   useEffect(() => {
     saveMatchInfo({ date: state.matchDate, local: state.local, visitante: state.visitante });
   }, [state.matchDate, state.local, state.visitante]);
+
+  useEffect(() => {
+    saveMatchId(state.matchId);
+  }, [state.matchId]);
 
   const copyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
